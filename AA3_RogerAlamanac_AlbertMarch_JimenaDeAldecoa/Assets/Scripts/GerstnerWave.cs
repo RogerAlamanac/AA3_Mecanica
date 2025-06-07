@@ -4,46 +4,50 @@ using UnityEngine;
 
 public class GerstnerWave : MonoBehaviour
 {
-    public float amplitude = 1f;
-    public float wavelength = 2f;
-    public float speed = 1f;
-    public float phase = 0f;
-    public float steepness = 1f;
-    public Vector2 direction = new Vector2(1, 0);
+    public float amplitude = 1f;       // A
+    public float wavelength = 5f;      // L
+    public float speed = 1f;           // v
+    public float phase = 0f;           // 
+    public float steepness = 0.5f;     // Q
+    public Vector2 direction = new Vector2(1, 0); // D
 
-    private Mesh mesh;
+    private WaterMeshGenerator waterMesh;
     private Vector3[] baseVertices;
-
-    void Start()
-    {
-        mesh = GetComponent<MeshFilter>().mesh;
-        baseVertices = mesh.vertices;
-    }
+    private Vector3[] displacedVertices;
+    private float k;        // wave number
+    private float frequency; // angular frequency
 
     void Update()
     {
-        Vector3[] vertices = new Vector3[baseVertices.Length];
-        float k = 2 * Mathf.PI / wavelength;
-        float omega = speed * k;
-
-        for (int i = 0; i < vertices.Length; i++)
+        if (baseVertices == null)
         {
-            Vector3 v = baseVertices[i];
-            float dot = Vector2.Dot(direction.normalized, new Vector2(v.x, v.z));
-            float theta = k * dot - omega * Time.time + phase;
+            waterMesh = GetComponent<WaterMeshGenerator>();
+            baseVertices = waterMesh.GetVertices();
+            if (baseVertices == null) return;
+            displacedVertices = new Vector3[baseVertices.Length];
+
+            k = 2 * Mathf.PI / wavelength;
+            frequency = k * speed;
+            direction.Normalize();
+        }
+
+        for (int i = 0; i < baseVertices.Length; i++)
+        {
+            Vector3 vertex = baseVertices[i];
+            float d = vertex.x * direction.x + vertex.z * direction.y;
+            float theta = k * (d - speed * Time.time) + phase;
+
             float cosTheta = Mathf.Cos(theta);
             float sinTheta = Mathf.Sin(theta);
 
-            float Q = steepness / (k * amplitude);
+            float x = vertex.x + steepness * amplitude * cosTheta * direction.x;
+            float y = amplitude * sinTheta;
+            float z = vertex.z + steepness * amplitude * cosTheta * direction.y;
 
-            v.x += Q * amplitude * direction.x * cosTheta;
-            v.y = amplitude * sinTheta;
-            v.z += Q * amplitude * direction.y * cosTheta;
-            vertices[i] = v;
+            displacedVertices[i] = new Vector3(x, y, z);
         }
 
-        mesh.vertices = vertices;
-        mesh.RecalculateNormals();
+        waterMesh.UpdateMesh(displacedVertices);
     }
 }
 
