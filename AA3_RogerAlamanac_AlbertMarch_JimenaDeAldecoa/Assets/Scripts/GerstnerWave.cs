@@ -6,7 +6,7 @@ public class GerstnerWave : MonoBehaviour
 {
     public float amplitude = 1f;       // A
     public float wavelength = 5f;      // L
-    public float speed = 1f;           // v
+    public float speed = 3f;           // v
     public float phase = 0f;           // 
     public float steepness = 0.5f;     // Q
     public Vector2 direction = new Vector2(1, 0); // D

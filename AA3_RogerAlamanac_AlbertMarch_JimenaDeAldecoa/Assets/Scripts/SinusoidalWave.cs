@@ -6,7 +6,7 @@ public class SinusoidalWave : MonoBehaviour
 {
     public float amplitude = 1f;
     public float wavelength = 5f;
-    public float speed = 1f;
+    public float speed = 3f;
     public float phase = 0f;
     public Vector2 direction = new Vector2(1, 0);
 
